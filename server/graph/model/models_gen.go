@@ -2,19 +2,37 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NewUser struct {
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Age      *int    `json:"age"`
+	Gender   *bool   `json:"gender"`
+	Phone    *string `json:"phone"`
+	Address  *string `json:"address"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type UpdateUser struct {
+	ID       int     `json:"id"`
+	Username string  `json:"username"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Age      *int    `json:"age"`
+	Gender   *bool   `json:"gender"`
+	Phone    *string `json:"phone"`
+	Address  *string `json:"address"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type UserConnection struct {
+	Total int     `json:"total"`
+	Nodes []*User `json:"nodes"`
+}
+
+type UserFilter struct {
+	Limit   int     `json:"limit"`
+	Offset  int     `json:"offset"`
+	Search  *string `json:"search"`
+	Order   *string `json:"order"`
+	OrderBy *string `json:"orderBy"`
+	Gender  *bool   `json:"gender"`
 }

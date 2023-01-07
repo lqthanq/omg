@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
-	"omg/graph"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/lqthanq/omg-simpler/app"
+	"github.com/lqthanq/omg-simpler/graph"
+	"github.com/lqthanq/omg-simpler/migrate"
 )
 
 const defaultPort = "9000"
@@ -17,6 +19,9 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+	app.InitDatabase()
+	migrate.Migrate()
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 

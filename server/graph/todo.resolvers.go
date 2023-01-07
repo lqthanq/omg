@@ -7,7 +7,8 @@ package graph
 import (
 	"context"
 	"fmt"
-	"omg/graph/model"
+
+	"github.com/lqthanq/omg-simpler/graph/model"
 )
 
 // CreateTodo is the resolver for the createTodo field.
@@ -17,7 +18,12 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+	return nil, nil
+}
+
+// ID is the resolver for the id field.
+func (r *todoResolver) ID(ctx context.Context, obj *model.Todo) (int, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -26,5 +32,9 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Todo returns TodoResolver implementation.
+func (r *Resolver) Todo() TodoResolver { return &todoResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type todoResolver struct{ *Resolver }

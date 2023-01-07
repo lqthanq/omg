@@ -1,0 +1,56 @@
+type User {
+  id: Int!
+  username: String!
+  email: String!
+  password: String!
+  age: Int
+  gender: Boolean
+  phone: String
+  address: String
+}
+
+input NewUser {
+  username: String!
+  email: String!
+  password: String!
+  age: Int
+  gender: Boolean
+  phone: String
+  address: String
+}
+
+input UpdateUser {
+  id: Int!
+  username: String!
+  email: String!
+  password: String!
+  age: Int
+  gender: Boolean
+  phone: String
+  address: String
+}
+
+input UserFilter {
+  limit: Int!
+  offset: Int!
+  search: String
+  order: String
+  orderBy: String
+  gender: Boolean
+}
+
+type UserConnection {
+  total: Int!
+  nodes: [User!]!
+}
+
+extend type Query {
+  users(filter: UserFilter!): UserConnection!
+  userByID(ID: Int!): User!
+}
+
+extend type Mutation {
+  createUser(input: NewUser!): User!
+  updateUser(input: UpdateUser!): User!
+  deleteUser(ID: Int!): Boolean
+}
