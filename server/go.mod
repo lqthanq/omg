@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/99designs/gqlgen v0.17.22
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/lunny/log v0.0.0-20160921050905-7887c61bf0de
 	github.com/vektah/gqlparser/v2 v2.5.1
 	golang.org/x/crypto v0.5.0

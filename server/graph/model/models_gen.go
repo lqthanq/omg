@@ -2,6 +2,12 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type NewUser struct {
 	Username string  `json:"username"`
 	Email    string  `json:"email"`
@@ -23,11 +29,6 @@ type UpdateUser struct {
 	Address  *string `json:"address"`
 }
 
-type UserConnection struct {
-	Total int     `json:"total"`
-	Nodes []*User `json:"nodes"`
-}
-
 type UserFilter struct {
 	Limit   int     `json:"limit"`
 	Offset  int     `json:"offset"`
@@ -35,4 +36,45 @@ type UserFilter struct {
 	Order   *string `json:"order"`
 	OrderBy *string `json:"orderBy"`
 	Gender  *bool   `json:"gender"`
+}
+
+type Ordertype string
+
+const (
+	OrdertypeAsc  Ordertype = "ASC"
+	OrdertypeDesc Ordertype = "DESC"
+)
+
+var AllOrdertype = []Ordertype{
+	OrdertypeAsc,
+	OrdertypeDesc,
+}
+
+func (e Ordertype) IsValid() bool {
+	switch e {
+	case OrdertypeAsc, OrdertypeDesc:
+		return true
+	}
+	return false
+}
+
+func (e Ordertype) String() string {
+	return string(e)
+}
+
+func (e *Ordertype) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Ordertype(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ORDERTYPE", str)
+	}
+	return nil
+}
+
+func (e Ordertype) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

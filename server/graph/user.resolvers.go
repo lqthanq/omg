@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/lqthanq/omg-simpler/app"
@@ -21,7 +22,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	app.DB.Where("email = ?", strings.ToLower(input.Email)).Take(&userExists)
 
 	if userExists.ID > 0 {
-		return nil, errors.New("email already exists")
+		return nil, errors.New("user already exists")
 	}
 
 	hasPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
@@ -55,25 +56,124 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
+	// send mail
+	// expired := time.Now().Add(time.Second * 3600 * 24).Unix() // 1 day
+	// token := map[string]string{
+	// 	"username": user.Username,
+	// 	"URL":      os.Getenv("APP_URL") + "/activation/" + middleware.JwtCreate(user.ID, expired),
+	// }
+	// if ok, err := email.SendMail(user.Email, "Account activation", email.VerifyAccountTemplateHTML, token); !ok {
+	// 	return nil, err
+	// }
+
 	return &user, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+	var user model.User
+	if err := app.DB.Where("id = ?", input.ID).Take(&user).Error; err != nil {
+		return nil, err
+	}
+
+	var userExists *model.User
+	app.DB.Where("email = ?", input.Email).Take(&userExists)
+	if userExists.ID > 0 {
+		return nil, errors.New("email already exists")
+	}
+
+	if len(input.Username) > 0 {
+		user.Username = input.Username
+	}
+
+	if len(input.Email) > 0 {
+		user.Email = input.Email
+	}
+
+	if input.Age != nil && *input.Age > 0 {
+		user.Age = input.Age
+	}
+
+	if input.Gender != nil {
+		user.Gender = input.Gender
+	}
+
+	if input.Phone != nil {
+		user.Phone = input.Phone
+	}
+
+	if input.Address != nil {
+		user.Address = input.Address
+	}
+
+	if err := app.DB.Save(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id int) (*bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+func (r *mutationResolver) DeleteUser(ctx context.Context, id int) (bool, error) {
+	var user model.User
+	if err := app.DB.Where("id = ?", id).Take(&user).Error; err != nil {
+		return false, err
+	}
+
+	if err := app.DB.Where("id = ?", id).Delete(&user).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context, filter model.UserFilter) (*model.UserConnection, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	var (
+		res    model.UserConnection
+		limit  = 20
+		offset = 0
+		order  = "DESC"
+	)
+
+	if filter.Limit > 0 {
+		limit = filter.Limit
+	}
+
+	if filter.Offset > 0 {
+		offset = filter.Offset
+	}
+
+	tx := app.DB.Model(model.User{})
+	if filter.Search != nil && len(*filter.Search) > 0 {
+		searchLower := "%" + strings.ToLower(*filter.Search) + "%"
+		tx = tx.Where("CONCAT(LOWER(email), LOWER(username)) LIKE ?", searchLower)
+	}
+
+	if filter.Order != nil && len(*filter.Order) > 0 {
+		// if *filter.Order == model.OrdertypeDesc {
+		order = *filter.Order
+		// }
+	}
+
+	if filter.Gender != nil {
+		if reflect.TypeOf(*filter.Gender).Kind() == reflect.Bool {
+			tx = tx.Where("gender = ?", filter.Gender)
+		}
+	}
+
+	if err := tx.Debug().Count(&res.Total).Limit(limit).Offset(offset).Order(fmt.Sprintf("created_at %s", order)).Scan(&res.Nodes).Error; err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 // UserByID is the resolver for the userByID field.
 func (r *queryResolver) UserByID(ctx context.Context, id int) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: UserByID - userByID"))
+	var user model.User
+	if err := app.DB.Where("id = ?", id).Take(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

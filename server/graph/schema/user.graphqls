@@ -30,6 +30,11 @@ input UpdateUser {
   address: String
 }
 
+enum ORDERTYPE {
+  ASC
+  DESC
+}
+
 input UserFilter {
   limit: Int!
   offset: Int!
@@ -52,5 +57,5 @@ extend type Query {
 extend type Mutation {
   createUser(input: NewUser!): User!
   updateUser(input: UpdateUser!): User!
-  deleteUser(ID: Int!): Boolean
+  deleteUser(ID: Int!): Boolean!
 }

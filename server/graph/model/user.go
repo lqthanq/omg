@@ -10,3 +10,8 @@ type User struct {
 	Phone    *string `json:"phone"`
 	Address  *string `json:"address"`
 }
+
+type UserConnection struct {
+	Total int64   `json:"total"`
+	Nodes []*User `json:"nodes"`
+}

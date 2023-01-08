@@ -1,12 +1,26 @@
 package helper
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html"
 	"io"
+	"net/http"
 	"os"
+	"time"
 )
+
+var NetClient = &http.Client{
+	Timeout: time.Second * 60,
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	},
+	CheckRedirect: func(r *http.Request, via []*http.Request) error {
+		r.URL.Opaque = r.URL.Path
+		return nil
+	},
+}
 
 func PrintVars(w io.Writer, writePre bool, vars ...interface{}) {
 	if writePre {
