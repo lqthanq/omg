@@ -20,7 +20,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	var userExists *model.User
 	app.DB.Where("email = ?", strings.ToLower(input.Email)).Take(&userExists)
 
-	if userExists != nil {
+	if userExists.ID > 0 {
 		return nil, errors.New("email already exists")
 	}
 
